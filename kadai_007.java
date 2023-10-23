@@ -107,7 +107,3 @@ public class Posts_Chapter07 {
 		}
 	}
 }
-
-	}
-}
-}
