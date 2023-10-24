@@ -1,0 +1,131 @@
+package kadai_010;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class Scores_Chapter10{
+	public static void main(String[] args) {
+	
+	Connection con = null;
+	PreparedStatement statement = null;
+	
+	String[][] userList = {
+//			{ "id", "name", "score_math", "score_english" },
+			{ "1", "'侍健太'"		, "65", "90" },
+			{ "2", "'刀沢彩香'"		, "85", "70" },
+			{ "3", "'戦国広志'"		, "75", "85" },
+			{ "4", "'武士山美咲'"	, "75", "85" },
+			{ "5","'武蔵小路勇気'"	, "0"  , "0"  }
+	};
+	
+	try {
+		/*
+		 (1)データベースに接続【パスワード】
+		*/
+		con = DriverManager.getConnection(
+				"jdbc:mysql://localhost/challenge_java",
+				"root",
+				"ghdwv5aKRiku0827");
+
+		//コメント
+		System.out.println("データベース接続成功:com.mysql.cj.jdbc.ConnectionImpl@xxxxxxxx");
+		System.out.println("レコード更新を実行します");
+		
+		/*
+		 (2)　SQLクエリを準備
+		*/
+		ここに、テーブル作成のSQLクエリを作成するべきかと思います。;
+        // SQLクエリを準備
+ /*       statement = con.createStatement();
+        String sql = """
+                     CREATE TABLE  scores(
+                       id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                       name VARCHAR(60) NOT NULL,
+                       score_math INT(11) NOT NULL,
+                       score_english INT(11) NOT NULL,
+                     );
+                     """;
+*/
+        //　SQLクエリを実行（DBMSに送信）
+        int rowCnt = statement.executeUpdate(sql);
+        System.out.println("テーブルを作成:rowCnt=" + rowCnt );
+		 /*
+		 （3）　点数データの更新
+		 */
+		//何件登録したかカウントする変数を用意
+		int rowCnt = 0;
+
+		//ループで処理を実行（配列分)
+		for (int i = 0; i < userList.length; i++) {
+			//SQLにINSERT(DBに登録するSQL文を文字列で記載)
+			String sql = "INSERT INTO scores( id , name , score_math , score_english) VALUES ( ? , ? , ? , ?);";
+			//preapredStatementにsql1を渡す。
+			statement = con.prepareStatement(sql);
+
+			// SQLクエリの「?」部分をリストのデータに置き換え(setStringでエラー発砲)
+			statement.setString(1, userList[i][0]); // idカラム	(生徒ID)
+			statement.setString(2, userList[i][1]); // nameカラム（氏名）
+			statement.setString(3, userList[i][2]); // score_mathカラム（数学の点数）
+			statement.setString(4, userList[i][3]); // score_englishカラム（英語の点数）
+			
+			//SQLを実行する文。
+			rowCnt += statement.executeUpdate();
+
+		}
+		System.out.println(rowCnt + "件のレコードが更新されました");
+		
+		
+		/*
+		（4）　点数順更新する
+		 */
+		System.out.println("数学・英語の点数が高い順に並べ替えました");
+
+		//　データ検索のSQLクエリを実行（DBMSに送信）
+		//データを取得するSQL文を文字列で記載
+		String sqlSelect = "SELECT * FROM score ORDER BY score_math DESC, score_english DESC";
+	
+		//ResultSetに結果を出力
+		ResultSet result = statement.executeQuery(sqlSelect);
+
+		
+		/*
+		 （5）　並び替え結果を表示する
+		 */
+			while (result.next()) {
+				//生徒IDを取得(Int)
+				int ID = result.getInt("id");
+				//氏名を取得(String)
+				String name = result.getString("name");
+				//数学の点数を取得(Int)
+				int score_math = result.getInt("score_math");
+				//英語の点数を取得(Int)
+				int score_english = result.getInt("score_english");
+				//表示する文字列を記載(出力)
+					System.out.println(result.getRow() + "件目：生徒ID="+ ID + "／名前" + name + "／数学=" + score_math + "／英語＝" + score_english);
+			}
+	
+	
+		//----以下例外処理----
+	} catch (SQLException e) {
+		System.out.println("エラー発生：" + e.getMessage());
+	} finally {
+		// 使用したオブジェクトを解放
+		if (statement != null) {
+			try {
+				statement.close();
+			} catch (SQLException ignore) {
+			}
+		}
+		if (con != null) {
+			try {
+				con.close();
+			} catch (SQLException ignore) {
+			}
+		}
+	}
+	
+}
+}
